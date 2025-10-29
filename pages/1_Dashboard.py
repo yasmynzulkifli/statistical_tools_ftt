@@ -10,7 +10,7 @@ ensure_login()
 st.title("📊 Dashboard — FTT Metrics")
 
 BRANDS = ["FindHouse", "CheckValue"]
-COLORS = {"FindHouse": "#000000", "CheckValue": "#FE5D9F"}
+COLORS = {"FindHouse": "#FF4800", "CheckValue": "#48cae4"}
 
 today = date.today()
 start = today - timedelta(days=60)
@@ -66,3 +66,4 @@ chart(ads, "date", "impressions", "Google Ads • Impressions")
 chart(posts, "date", "total_listings", "Agent Postings • Total Listings")
 chart(idx, "date", "indexed", "Google Index • Indexed Pages")
 chart(rk, "date", "rank", "Semrush Rank (Lower = Better)")
+

@@ -12,7 +12,8 @@ st.set_page_config(
 ensure_login()
 
 # --- Import required variables ---
-BRANDS = ["FindHouse", "CheckValue"]
+# Define BRANDS here or import from your config
+BRANDS = ["Brand1", "Brand2", "Brand3"]  # Replace with your actual brands
 
 # Helper function to format large numbers
 def format_compact(num):
@@ -26,11 +27,11 @@ def format_compact(num):
 
 # Fetch data from Supabase
 @st.cache_data(ttl=300)
-def fetch_data(table: str, brand: str, limit: int = None, _cache_version: int = 0):
+def fetch_data(table: str, brand: str, limit: int = None, order_by: str = "date", _cache_version: int = 0):
     """Fetch data from Supabase table"""
     try:
         supabase = get_supabase()
-        query = supabase.table(table).select("*").eq("brand", brand).order("date", desc=True)
+        query = supabase.table(table).select("*").eq("brand", brand).order(order_by, desc=True)
         
         if limit:
             query = query.limit(limit)
@@ -62,8 +63,8 @@ for brand in BRANDS:
     block.append(brand)
     block.append(separator)
     
-    # Google Analytics
-    ga = fetch_data("ga_traffic", brand, LATEST_N, _cache_version=cache_v)
+    # Google Analytics - uses end_date for ordering
+    ga = fetch_data("ga_traffic", brand, LATEST_N, order_by="end_date", _cache_version=cache_v)
     
     if not ga.empty:
         ga = ga.sort_values("end_date")
@@ -73,8 +74,8 @@ for brand in BRANDS:
             end = pd.to_datetime(r['end_date']).strftime("%d/%m/%Y")
             block.append(f"{start}–{end}: {int(r['users'])}")
     
-    # Google Ads
-    ads = fetch_data("ads_metrics", brand, LATEST_N, _cache_version=cache_v)
+    # Google Ads - uses date
+    ads = fetch_data("ads_metrics", brand, LATEST_N, order_by="date", _cache_version=cache_v)
     
     if not ads.empty:
         ads = ads.sort_values("date")
@@ -84,8 +85,8 @@ for brand in BRANDS:
             d = pd.to_datetime(r['date']).strftime("%d/%m/%Y")
             block.append(f"{d}: [{int(r['clicks'])},{int(r['impressions'])}]")
     
-    # Agent Postings
-    posts = fetch_data("agent_postings", brand, LATEST_N, _cache_version=cache_v)
+    # Agent Postings - uses date
+    posts = fetch_data("agent_postings", brand, LATEST_N, order_by="date", _cache_version=cache_v)
     
     if not posts.empty:
         posts = posts.sort_values("date")
@@ -96,8 +97,8 @@ for brand in BRANDS:
             block.append(f"{d}: {int(r['total_listings'])} "
                        f"[{int(r['sale_listings'])},{int(r['rent_listings'])},{int(r['auction_listings'])}]")
     
-    # Google Index
-    idx = fetch_data("google_index", brand, LATEST_N, _cache_version=cache_v)
+    # Google Index - uses date
+    idx = fetch_data("google_index", brand, LATEST_N, order_by="date", _cache_version=cache_v)
     
     if not idx.empty:
         idx = idx.sort_values("date")
@@ -107,8 +108,8 @@ for brand in BRANDS:
             d = pd.to_datetime(r['date']).strftime("%d/%m/%Y")
             block.append(f"{d}: {int(r['indexed'])}")
     
-    # Semrush Rank
-    rk = fetch_data("semrush_rank", brand, 1, _cache_version=cache_v)
+    # Semrush Rank - uses date
+    rk = fetch_data("semrush_rank", brand, 1, order_by="date", _cache_version=cache_v)
     
     if not rk.empty:
         r = rk.iloc[0]

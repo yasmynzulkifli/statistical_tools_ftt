@@ -12,10 +12,55 @@ st.title("📊 Dashboard — FTT Metrics")
 BRANDS = ["FindHouse", "CheckValue"]
 COLORS = {"FindHouse": "#FF4800", "CheckValue": "#48cae4"}
 
-today = date.today()
-start = today - timedelta(days=60)
+# Initialize session state for dates
+if "start_date" not in st.session_state:
+    st.session_state.start_date = date.today() - timedelta(days=60)
+if "end_date" not in st.session_state:
+    st.session_state.end_date = date.today()
+
+# Quick date presets
+st.markdown("**Quick Select:**")
+col1, col2, col3, col4, col5 = st.columns(5)
+if col1.button("Last 7 Days"):
+    st.session_state.start_date = date.today() - timedelta(days=7)
+    st.session_state.end_date = date.today()
+if col2.button("Last 30 Days"):
+    st.session_state.start_date = date.today() - timedelta(days=30)
+    st.session_state.end_date = date.today()
+if col3.button("Last 60 Days"):
+    st.session_state.start_date = date.today() - timedelta(days=60)
+    st.session_state.end_date = date.today()
+if col4.button("Last 90 Days"):
+    st.session_state.start_date = date.today() - timedelta(days=90)
+    st.session_state.end_date = date.today()
+if col5.button("Year to Date"):
+    st.session_state.start_date = date(date.today().year, 1, 1)
+    st.session_state.end_date = date.today()
+
+# Manual date inputs
+col1, col2 = st.columns(2)
+with col1:
+    start = st.date_input(
+        "📅 Start Date",
+        value=st.session_state.start_date,
+        max_value=date.today(),
+        key="start_input"
+    )
+with col2:
+    end = st.date_input(
+        "📅 End Date",
+        value=st.session_state.end_date,
+        min_value=start,
+        max_value=date.today(),
+        key="end_input"
+    )
+
+# Update session state if user changes dates manually
+st.session_state.start_date = start
+st.session_state.end_date = end
+
 brands = st.multiselect("🎯 Select Brands", BRANDS, default=BRANDS)
-st.caption(f"Showing data from {start} to {today}")
+st.caption(f"Showing data from {start} to {end}")
 
 # Fetch data from Supabase
 ga = fetch_table("ga_traffic")
@@ -28,7 +73,7 @@ rk = fetch_table("semrush_rank")
 def filter_range(df, date_col):
     if df.empty: return df
     df[date_col] = pd.to_datetime(df[date_col], errors="coerce").dt.date
-    df = df[(df[date_col] >= start) & (df[date_col] <= today) & (df["brand"].isin(brands))]
+    df = df[(df[date_col] >= start) & (df[date_col] <= end) & (df["brand"].isin(brands))]
     # SORT BY DATE AND BRAND
     return df.sort_values([date_col, "brand"]).reset_index(drop=True)
 

@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from utils.supabase_helpers import ensure_login, supabase
+from utils.supabase_helpers import ensure_login, get_supabase
 
 st.set_page_config(
     page_title="Whatsapp Blast",
@@ -29,6 +29,7 @@ def format_compact(num):
 def fetch_data(table: str, brand: str, limit: int = None, _cache_version: int = 0):
     """Fetch data from Supabase table"""
     try:
+        supabase = get_supabase()
         query = supabase.table(table).select("*").eq("brand", brand).order("date", desc=True)
         
         if limit:

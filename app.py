@@ -13,11 +13,8 @@ st.set_page_config(
 ensure_login()
 
 # --- Import/Define required variables and functions ---
-# Add these imports/definitions from your original code
-from your_module import BRANDS, AGENT_POSTING_BRANDS, dl_csv_template
-# OR define them here if they're constants:
-# BRANDS = ["Brand1", "Brand2", "Brand3"]
-# AGENT_POSTING_BRANDS = ["Brand1", "Brand2"]
+BRANDS = ["FindHouse", "CheckValue"]
+AGENT_POSTING_BRANDS = ["FindHouse"]
 
 # --- Sidebar Navigation ---
 st.sidebar.title("🏠 FTT Metrics")
@@ -62,3 +59,4 @@ st.markdown(
     - ✍️ **Data Entry:** Add or import records  
     """
 )
+

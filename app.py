@@ -16,6 +16,21 @@ ensure_login()
 BRANDS = ["FindHouse", "CheckValue"]
 AGENT_POSTING_BRANDS = ["FindHouse"]
 
+# --- Template CSV ---
+def dl_csv_template(name: str, df: pd.DataFrame):
+    """Create a downloadable CSV template button."""
+    st.download_button(
+        label=f"📥 {name} Template",
+        data=df.to_csv(index=False).encode("utf-8"),
+        file_name=f"{name}_template.csv",
+        mime="text/csv",
+        use_container_width=True
+    )
+
+
+
+
+
 # --- Sidebar Navigation ---
 st.sidebar.title("🏠 FTT Metrics")
 st.sidebar.caption(f"Logged in as **{st.session_state.get('username','')}**")
@@ -59,4 +74,5 @@ st.markdown(
     - ✍️ **Data Entry:** Add or import records  
     """
 )
+
 

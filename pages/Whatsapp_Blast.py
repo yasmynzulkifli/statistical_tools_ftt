@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
-from utils.supabase_helpers import ensure_login
-from utils.db import get_supabase_client
+from utils.supabase_helpers import ensure_login, supabase
 
 st.set_page_config(
     page_title="Whatsapp Blast",
@@ -13,7 +12,8 @@ st.set_page_config(
 ensure_login()
 
 # --- Import required variables ---
-from your_config import BRANDS  # adjust import path
+# Define BRANDS here or import from your config
+BRANDS = ["Brand1", "Brand2", "Brand3"]  # Replace with your actual brands
 
 # Helper function to format large numbers
 def format_compact(num):
@@ -30,7 +30,6 @@ def format_compact(num):
 def fetch_data(table: str, brand: str, limit: int = None, _cache_version: int = 0):
     """Fetch data from Supabase table"""
     try:
-        supabase = get_supabase_client()
         query = supabase.table(table).select("*").eq("brand", brand).order("date", desc=True)
         
         if limit:

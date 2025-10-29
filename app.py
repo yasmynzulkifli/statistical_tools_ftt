@@ -32,7 +32,7 @@ def dl_csv_template(name: str, df: pd.DataFrame):
 st.sidebar.title("🏠 FTT Metrics")
 st.sidebar.caption(f"Logged in as **{st.session_state.get('username','')}**")
 
-st.sidebar.markdown("---")
+# st.sidebar.markdown("---")
 
 # --- Pages Navigation (moved here, before CSV templates) ---
 # st.sidebar.page_link("app.py", label="🏠 Home", icon="🏠")
@@ -40,7 +40,7 @@ st.sidebar.markdown("---")
 # st.sidebar.page_link("pages/Overview.py", label="📋 Overview", icon="📋")
 # st.sidebar.page_link("pages/Data_Entry.py", label="✍️ Data Entry", icon="✍️")
 
-st.sidebar.markdown("---")
+# st.sidebar.markdown("---")
 with st.sidebar:
     with st.expander("📁 CSV Templates & Format Guide", expanded=False):
         n = len(BRANDS)
@@ -79,6 +79,7 @@ st.markdown(
     - ✍️ **Data Entry:** Add or import records  
     """
 )
+
 
 
 

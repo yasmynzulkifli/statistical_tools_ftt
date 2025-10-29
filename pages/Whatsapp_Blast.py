@@ -12,8 +12,7 @@ st.set_page_config(
 ensure_login()
 
 # --- Import required variables ---
-# Define BRANDS here or import from your config
-BRANDS = ["Brand1", "Brand2", "Brand3"]  # Replace with your actual brands
+BRANDS = ["FindHouse", "CheckValue"]
 
 # Helper function to format large numbers
 def format_compact(num):

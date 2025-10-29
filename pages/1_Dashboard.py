@@ -12,53 +12,67 @@ st.title("📊 Dashboard — FTT Metrics")
 BRANDS = ["FindHouse", "CheckValue"]
 COLORS = {"FindHouse": "#FF4800", "CheckValue": "#48cae4"}
 
-# Initialize session state for dates
-if "start_date" not in st.session_state:
-    st.session_state.start_date = date.today() - timedelta(days=60)
-if "end_date" not in st.session_state:
-    st.session_state.end_date = date.today()
+# ---------- Date Filter Init ----------
+if "date_range" not in st.session_state:
+    st.session_state.date_range = (date.today() - timedelta(days=60), date.today())
 
-# Quick date presets
-st.markdown("**Quick Select:**")
-col1, col2, col3, col4, col5 = st.columns(5)
-if col1.button("Last 7 Days"):
-    st.session_state.start_date = date.today() - timedelta(days=7)
-    st.session_state.end_date = date.today()
-if col2.button("Last 30 Days"):
-    st.session_state.start_date = date.today() - timedelta(days=30)
-    st.session_state.end_date = date.today()
-if col3.button("Last 60 Days"):
-    st.session_state.start_date = date.today() - timedelta(days=60)
-    st.session_state.end_date = date.today()
-if col4.button("Last 90 Days"):
-    st.session_state.start_date = date.today() - timedelta(days=90)
-    st.session_state.end_date = date.today()
-if col5.button("Year to Date"):
-    st.session_state.start_date = date(date.today().year, 1, 1)
-    st.session_state.end_date = date.today()
+def _preset_dates(preset: str):
+    today = date.today()
+    if preset == "Last 7 Days":
+        return (today - timedelta(days=7), today)
+    if preset == "Last 30 Days":
+        return (today - timedelta(days=30), today)
+    if preset == "Last 60 Days":
+        return (today - timedelta(days=60), today)
+    if preset == "Last 90 Days":
+        return (today - timedelta(days=90), today)
+    if preset == "Year to Date":
+        return (date(today.year, 1, 1), today)
+    return None
 
-# Manual date inputs
-col1, col2 = st.columns(2)
-with col1:
-    start = st.date_input(
-        "📅 Start Date",
-        value=st.session_state.start_date,
+# ---------- Date Filter UI ----------
+with st.expander("📆 Date Filters", expanded=False):
+    # Range Calendar (top)
+    start_default, end_default = st.session_state.date_range
+    dr = st.date_input(
+        "Select date range",
+        value=(start_default, end_default),
         max_value=date.today(),
-        key="start_input"
-    )
-with col2:
-    end = st.date_input(
-        "📅 End Date",
-        value=st.session_state.end_date,
-        min_value=start,
-        max_value=date.today(),
-        key="end_input"
+        format="YYYY-MM-DD",
+        key="date_range_input",
     )
 
-# Update session state if user changes dates manually
-st.session_state.start_date = start
-st.session_state.end_date = end
+    # Keep session state in sync with manual range changes
+    if isinstance(dr, (list, tuple)) and len(dr) == 2:
+        s, e = dr
+        if s > e:
+            s, e = e, s  # enforce ordering
+        e = min(e, date.today())  # clamp to today
+        st.session_state.date_range = (s, e)
+    else:
+        st.warning("Please select both a start and end date.")
 
+    # Small spacer to visually separate calendar and quick filter
+    st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+
+    # Quick Filter (dropdown under the calendar)
+    preset = st.selectbox(
+        "Quick filter",
+        ["— Select —", "Last 7 Days", "Last 30 Days", "Last 60 Days", "Last 90 Days", "Year to Date"],
+        help="Choose a preset to auto-fill the range above.",
+        key="date_quick_preset"
+    )
+
+    if preset != "— Select —":
+        new_range = _preset_dates(preset)
+        if new_range and new_range != st.session_state.date_range:
+            st.session_state.date_range = new_range
+            st.rerun()  # immediately refresh so the calendar shows the new range
+
+# ---------- Use Date Range ----------
+start, end = st.session_state.date_range
+
+# Brand Filter
 brands = st.multiselect("🎯 Select Brands", BRANDS, default=BRANDS)
 st.caption(f"Showing data from {start} to {end}")
 

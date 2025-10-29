@@ -1,4 +1,6 @@
 import streamlit as st
+import pandas as pd
+from datetime import date
 from utils.supabase_helpers import ensure_login
 
 st.set_page_config(
@@ -9,6 +11,13 @@ st.set_page_config(
 
 # --- Login ---
 ensure_login()
+
+# --- Import/Define required variables and functions ---
+# Add these imports/definitions from your original code
+from your_module import BRANDS, AGENT_POSTING_BRANDS, dl_csv_template
+# OR define them here if they're constants:
+# BRANDS = ["Brand1", "Brand2", "Brand3"]
+# AGENT_POSTING_BRANDS = ["Brand1", "Brand2"]
 
 # --- Sidebar Navigation ---
 st.sidebar.title("🏠 FTT Metrics")
@@ -53,4 +62,3 @@ st.markdown(
     - ✍️ **Data Entry:** Add or import records  
     """
 )
-

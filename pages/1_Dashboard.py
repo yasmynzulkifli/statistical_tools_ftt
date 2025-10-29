@@ -28,7 +28,9 @@ rk = fetch_table("semrush_rank")
 def filter_range(df, date_col):
     if df.empty: return df
     df[date_col] = pd.to_datetime(df[date_col], errors="coerce").dt.date
-    return df[(df[date_col] >= start) & (df[date_col] <= today) & (df["brand"].isin(brands))]
+    df = df[(df[date_col] >= start) & (df[date_col] <= today) & (df["brand"].isin(brands))]
+    # SORT BY DATE AND BRAND
+    return df.sort_values([date_col, "brand"]).reset_index(drop=True)
 
 ga = filter_range(ga, "end_date")
 ads = filter_range(ads, "date")
@@ -66,4 +68,3 @@ chart(ads, "date", "impressions", "Google Ads • Impressions")
 chart(posts, "date", "total_listings", "Agent Postings • Total Listings")
 chart(idx, "date", "indexed", "Google Index • Indexed Pages")
 chart(rk, "date", "rank", "Semrush Rank (Lower = Better)")
-

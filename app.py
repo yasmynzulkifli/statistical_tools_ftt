@@ -35,10 +35,10 @@ st.sidebar.caption(f"Logged in as **{st.session_state.get('username','')}**")
 st.sidebar.markdown("---")
 
 # --- Pages Navigation (moved here, before CSV templates) ---
-st.sidebar.page_link("app.py", label="🏠 Home", icon="🏠")
-st.sidebar.page_link("pages/Dashboard.py", label="📊 Dashboard", icon="📊")
-st.sidebar.page_link("pages/Overview.py", label="📋 Overview", icon="📋")
-st.sidebar.page_link("pages/Data_Entry.py", label="✍️ Data Entry", icon="✍️")
+# st.sidebar.page_link("app.py", label="🏠 Home", icon="🏠")
+# st.sidebar.page_link("pages/Dashboard.py", label="📊 Dashboard", icon="📊")
+# st.sidebar.page_link("pages/Overview.py", label="📋 Overview", icon="📋")
+# st.sidebar.page_link("pages/Data_Entry.py", label="✍️ Data Entry", icon="✍️")
 
 st.sidebar.markdown("---")
 with st.sidebar:
@@ -79,6 +79,7 @@ st.markdown(
     - ✍️ **Data Entry:** Add or import records  
     """
 )
+
 
 
 

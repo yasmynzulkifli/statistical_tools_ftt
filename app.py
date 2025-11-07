@@ -76,9 +76,11 @@ st.markdown(
     Use the sidebar to navigate between pages.  
     - 📊 **Dashboard:** Visualize key trends  
     - 📋 **Overview:** Review all tables  
-    - ✍️ **Data Entry:** Add or import records  
+    - ✍️ **Data Entry:** Add or import records 
+    - 💬 **Whatsapp Blast:** Copy data to send at WhatsApp
     """
 )
+
 
 
 

@@ -60,9 +60,7 @@ with st.sidebar:
         dl_csv_template("google_index", pd.DataFrame({
             "brand": BRANDS, "date": [date.today()]*n, "indexed": [512]*n
         }))
-        dl_csv_template("semrush_rank", pd.DataFrame({
-            "brand": BRANDS, "date": [date.today()]*n, "rank": [1430000]*n
-        }))
+        # REMOVED: semrush_rank template
 
 st.sidebar.markdown("---")
 if st.sidebar.button("🚪 Logout", use_container_width=True):
@@ -80,9 +78,3 @@ st.markdown(
     - 💬 **Whatsapp Blast:** Copy data to send at WhatsApp
     """
 )
-
-
-
-
-
-

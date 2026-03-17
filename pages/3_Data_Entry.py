@@ -148,25 +148,16 @@ with tab6:
 
     brand = st.selectbox("Brand     ", BRANDS, key="br_b")
 
-    # GA-style week picker: start date and end date
-    col1, col2 = st.columns(2)
-    with col1:
-        week_start = st.date_input(
-            "Week Start",
-            value=date.today() - timedelta(days=date.today().weekday() + 7),  # last Monday
-            max_value=date.today(),
-            key="br_start"
-        )
-    with col2:
-        week_end = st.date_input(
-            "Week End",
-            value=date.today() - timedelta(days=date.today().weekday() + 1),  # last Sunday
-            max_value=date.today(),
-            key="br_end"
-        )
-
-    if week_start > week_end:
-        st.warning("⚠️ Week Start must be before Week End.")
+    # GA-style single range picker — identical pattern to Google Analytics tab
+    _last_monday = date.today() - timedelta(days=date.today().weekday() + 7)
+    _last_sunday  = date.today() - timedelta(days=date.today().weekday() + 1)
+    week_range = st.date_input(
+        "Start & End Date",
+        value=[_last_monday, _last_sunday],
+        max_value=date.today(),
+        format="YYYY/MM/DD",
+        key="br_range"
+    )
 
     bounce = st.number_input(
         "Bounce Rate (%)",
@@ -176,20 +167,26 @@ with tab6:
         help="Enter as a percentage, e.g. 10 for 10%"
     )
 
-    st.caption(f"📅 Selected week: **{week_start.strftime('%d/%m/%Y')} – {week_end.strftime('%d/%m/%Y')}**  |  Bounce Rate: **{bounce:.1f}%**")
-
     if st.button("💾 Save", key="br_s"):
-        if week_start > week_end:
-            st.error("❌ Week Start must be before Week End.")
+        if not isinstance(week_range, (list, tuple)) or len(week_range) != 2:
+            st.error("❌ Please select both a start and end date.")
         else:
-            row = {
-                "brand": brand,
-                "week_start": str(week_start),
-                "week_end": str(week_end),
-                "bounce_rate": float(bounce)
-            }
-            upsert_rows("bounce_rate", [row], ["brand", "week_start"])
-            st.success("✅ Bounce rate saved!")
+            week_start, week_end = week_range
+            if week_start > week_end:
+                st.error("❌ Week Start must be before Week End.")
+            else:
+                st.caption(
+                    f"📅 **{week_start.strftime('%d/%m/%Y')} – {week_end.strftime('%d/%m/%Y')}**"
+                    f"  |  Bounce Rate: **{bounce:.1f}%**"
+                )
+                row = {
+                    "brand": brand,
+                    "week_start": str(week_start),
+                    "week_end": str(week_end),
+                    "bounce_rate": float(bounce)
+                }
+                upsert_rows("bounce_rate", [row], ["brand", "week_start"])
+                st.success("✅ Bounce rate saved!")
 
     st.markdown("---")
     upload_edit_import_csv_supabase(

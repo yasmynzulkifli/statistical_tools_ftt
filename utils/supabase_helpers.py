@@ -15,9 +15,12 @@ def get_supabase():
 # ---- AUTHENTICATION ----
 def login_page():
     st.title("🔐 FTT Metrics Login")
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
-    if st.button("Login", use_container_width=True):
+    # st.form lets Enter key on any field submit the form (Bug 1 fix)
+    with st.form("login_form"):
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+        submitted = st.form_submit_button("Login", use_container_width=True)
+    if submitted:
         users = st.secrets["auth"]["users"]
         if username in users and password == users[username]:
             st.session_state["logged_in"] = True
@@ -109,7 +112,12 @@ def query_duplicates(table, keys_df, conflict_cols):
 def upload_edit_import_csv_supabase(title, key, expected_cols, date_cols,
                                     int_cols, table_name, conflict_cols, row_builder):
     st.subheader(title)
-    up = st.file_uploader(f"Upload {table_name} CSV", type=["csv"], key=f"{key}_upload")
+    # Bug 3 fix: use a counter in the key so we can reset the uploader after import
+    upload_count_key = f"{key}_upload_count"
+    if upload_count_key not in st.session_state:
+        st.session_state[upload_count_key] = 0
+    uploader_key = f"{key}_upload_{st.session_state[upload_count_key]}"
+    up = st.file_uploader(f"Upload {table_name} CSV", type=["csv"], key=uploader_key)
     if up is None:
         return
     try:
@@ -154,7 +162,7 @@ def upload_edit_import_csv_supabase(title, key, expected_cols, date_cols,
 
         if mode == "overwrite":
             upsert_rows(table_name, rows, conflict_cols)
-            st.success(f"Imported {len(rows)} rows (duplicates overwritten).")
+            msg = f"✅ Imported {len(rows)} rows (duplicates overwritten)."
         else:
             if has_dups:
                 key_cols = conflict_cols if isinstance(conflict_cols, list) else [c.strip() for c in conflict_cols.split(",")]
@@ -167,9 +175,17 @@ def upload_edit_import_csv_supabase(title, key, expected_cols, date_cols,
                         new_rows.append(r)
                 if new_rows:
                     upsert_rows(table_name, new_rows, conflict_cols)
-                st.success(f"Imported {len(new_rows)} new rows (duplicates skipped).")
+                msg = f"✅ Imported {len(new_rows)} new rows (duplicates skipped)."
             else:
-                st.info("No duplicates detected; nothing to skip.")
-        st.toast("Done ✅")
-        time.sleep(0.5)
+                msg = "ℹ️ No duplicates detected; nothing to skip."
+
+        # Bug 3 fix: increment counter to reset the file uploader widget (clears stale file)
+        st.session_state[upload_count_key] += 1
+        # Bug 2 fix: store success message in session state, show it after rerun stays on same tab
+        st.session_state[f"{key}_import_msg"] = msg
         st.rerun()
+
+    # Show import result message (persists across rerun without jumping tabs)
+    if f"{key}_import_msg" in st.session_state:
+        st.success(st.session_state.pop(f"{key}_import_msg"))
+        st.toast("Done ✅")

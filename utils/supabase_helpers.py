@@ -13,23 +13,50 @@ def get_supabase():
     return create_client(url, key)
 
 # ---- AUTHENTICATION ----
+def _do_login(username, password):
+    """Shared login logic called by both button click and Enter key."""
+    users = st.secrets["auth"]["users"]
+    if username in users and password == users[username]:
+        st.session_state["logged_in"] = True
+        st.session_state["username"] = username
+        st.session_state["_login_error"] = False
+    else:
+        st.session_state["_login_error"] = True
+
 def login_page():
     st.title("🔐 FTT Metrics Login")
-    # st.form lets Enter key on any field submit the form (Bug 1 fix)
-    with st.form("login_form"):
-        username = st.text_input("Username")
-        password = st.text_input("Password", type="password")
-        submitted = st.form_submit_button("Login", use_container_width=True)
-    if submitted:
-        users = st.secrets["auth"]["users"]
-        if username in users and password == users[username]:
-            st.session_state["logged_in"] = True
-            st.session_state["username"] = username
-            st.success("Welcome back!")
-            time.sleep(0.5)
-            st.rerun()
-        else:
-            st.error("Invalid credentials")
+
+    # Track field values in session state so on_change can read them
+    if "_login_username" not in st.session_state:
+        st.session_state["_login_username"] = ""
+    if "_login_password" not in st.session_state:
+        st.session_state["_login_password"] = ""
+    if "_login_error" not in st.session_state:
+        st.session_state["_login_error"] = False
+
+    def _on_enter():
+        """Triggered when user presses Enter in the password field."""
+        _do_login(
+            st.session_state["_login_username"],
+            st.session_state["_login_password"]
+        )
+
+    st.text_input("Username", key="_login_username")
+    st.text_input("Password", type="password", key="_login_password", on_change=_on_enter)
+
+    if st.button("Login", use_container_width=True):
+        _do_login(
+            st.session_state["_login_username"],
+            st.session_state["_login_password"]
+        )
+
+    if st.session_state.get("_login_error"):
+        st.error("Invalid credentials")
+
+    if st.session_state.get("logged_in"):
+        st.success("Welcome back!")
+        time.sleep(0.5)
+        st.rerun()
 
 def ensure_login():
     if not st.session_state.get("logged_in"):
@@ -112,7 +139,7 @@ def query_duplicates(table, keys_df, conflict_cols):
 def upload_edit_import_csv_supabase(title, key, expected_cols, date_cols,
                                     int_cols, table_name, conflict_cols, row_builder):
     st.subheader(title)
-    # Bug 3 fix: use a counter in the key so we can reset the uploader after import
+    # Bug 3 fix: dynamic uploader key — increments after import to clear stale file
     upload_count_key = f"{key}_upload_count"
     if upload_count_key not in st.session_state:
         st.session_state[upload_count_key] = 0
@@ -179,13 +206,13 @@ def upload_edit_import_csv_supabase(title, key, expected_cols, date_cols,
             else:
                 msg = "ℹ️ No duplicates detected; nothing to skip."
 
-        # Bug 3 fix: increment counter to reset the file uploader widget (clears stale file)
+        # Bug 3 fix: reset uploader by incrementing its key
         st.session_state[upload_count_key] += 1
-        # Bug 2 fix: store success message in session state, show it after rerun stays on same tab
+        # Bug 2 fix: store message in session state so it shows on same tab after rerun
         st.session_state[f"{key}_import_msg"] = msg
         st.rerun()
 
-    # Show import result message (persists across rerun without jumping tabs)
+    # Show import result after rerun — stays on current tab, no jump
     if f"{key}_import_msg" in st.session_state:
         st.success(st.session_state.pop(f"{key}_import_msg"))
         st.toast("Done ✅")

@@ -13,9 +13,9 @@ st.title("✍️ Data Entry — Input or Import Data")
 BRANDS = ["FindHouse", "CheckValue"]
 AGENT_BRANDS = ["FindHouse"]
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "📈 Google Analytics", "🎯 Google Ads", "🏠 Agent Postings",
-    "🔎 Google Index", "📊 Semrush Rank"
+    "🔎 Google Index", "📊 Semrush Rank", "📉 Bounce Rate"
 ])
 
 # ---- GOOGLE ANALYTICS ----
@@ -138,5 +138,69 @@ with tab5:
         lambda r: {
             "brand": r["brand"], "date": str(r["date"]),
             "rank": int(r["rank"])
+        }
+    )
+
+# ---- BOUNCE RATE ----
+with tab6:
+    st.markdown("##### 📉 Weekly Bounce Rate")
+    st.caption("Enter the average bounce rate for a weekly date range (same format as Google Analytics).")
+
+    brand = st.selectbox("Brand     ", BRANDS, key="br_b")
+
+    # GA-style week picker: start date and end date
+    col1, col2 = st.columns(2)
+    with col1:
+        week_start = st.date_input(
+            "Week Start",
+            value=date.today() - timedelta(days=date.today().weekday() + 7),  # last Monday
+            max_value=date.today(),
+            key="br_start"
+        )
+    with col2:
+        week_end = st.date_input(
+            "Week End",
+            value=date.today() - timedelta(days=date.today().weekday() + 1),  # last Sunday
+            max_value=date.today(),
+            key="br_end"
+        )
+
+    if week_start > week_end:
+        st.warning("⚠️ Week Start must be before Week End.")
+
+    bounce = st.number_input(
+        "Bounce Rate (%)",
+        min_value=0.0, max_value=100.0,
+        step=0.1, format="%.1f",
+        key="br_val",
+        help="Enter as a percentage, e.g. 10 for 10%"
+    )
+
+    st.caption(f"📅 Selected week: **{week_start.strftime('%d/%m/%Y')} – {week_end.strftime('%d/%m/%Y')}**  |  Bounce Rate: **{bounce:.1f}%**")
+
+    if st.button("💾 Save", key="br_s"):
+        if week_start > week_end:
+            st.error("❌ Week Start must be before Week End.")
+        else:
+            row = {
+                "brand": brand,
+                "week_start": str(week_start),
+                "week_end": str(week_end),
+                "bounce_rate": float(bounce)
+            }
+            upsert_rows("bounce_rate", [row], ["brand", "week_start"])
+            st.success("✅ Bounce rate saved!")
+
+    st.markdown("---")
+    upload_edit_import_csv_supabase(
+        "Upload Bounce Rate CSV", "br",
+        ["brand", "week_start", "week_end", "bounce_rate"],
+        ["week_start", "week_end"], ["bounce_rate"],
+        "bounce_rate", ["brand", "week_start"],
+        lambda r: {
+            "brand": r["brand"],
+            "week_start": str(r["week_start"]),
+            "week_end": str(r["week_end"]),
+            "bounce_rate": float(r["bounce_rate"])
         }
     )

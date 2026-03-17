@@ -32,15 +32,6 @@ def dl_csv_template(name: str, df: pd.DataFrame):
 st.sidebar.title("🏠 FTT Metrics")
 st.sidebar.caption(f"Logged in as **{st.session_state.get('username','')}**")
 
-# st.sidebar.markdown("---")
-
-# --- Pages Navigation (moved here, before CSV templates) ---
-# st.sidebar.page_link("app.py", label="🏠 Home", icon="🏠")
-# st.sidebar.page_link("pages/Dashboard.py", label="📊 Dashboard", icon="📊")
-# st.sidebar.page_link("pages/Overview.py", label="📋 Overview", icon="📋")
-# st.sidebar.page_link("pages/Data_Entry.py", label="✍️ Data Entry", icon="✍️")
-
-# st.sidebar.markdown("---")
 with st.sidebar:
     with st.expander("📁 CSV Templates & Format Guide", expanded=False):
         n = len(BRANDS)
@@ -60,7 +51,12 @@ with st.sidebar:
         dl_csv_template("google_index", pd.DataFrame({
             "brand": BRANDS, "date": [date.today()]*n, "indexed": [512]*n
         }))
-        # REMOVED: semrush_rank template
+        dl_csv_template("bounce_rate", pd.DataFrame({
+            "brand": BRANDS,
+            "week_start": [date.today()]*n,
+            "week_end": [date.today()]*n,
+            "bounce_rate": [10.5]*n
+        }))
 
 st.sidebar.markdown("---")
 if st.sidebar.button("🚪 Logout", use_container_width=True):

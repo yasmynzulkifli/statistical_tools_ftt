@@ -117,7 +117,7 @@ with st.spinner("Loading latest data..."):
             for _, r in br.iterrows():
                 ws = pd.to_datetime(r['week_start']).strftime("%d/%m/%Y")
                 we = pd.to_datetime(r['week_end']).strftime("%d/%m/%Y")
-                block.append(f"{ws}–{we}: {float(r['bounce_rate']):.1f}%")
+                block.append(f"{ws}–{we}: {float(r['bounce_rate']):.2f}%")
 
         st.code("\n".join(block))
 

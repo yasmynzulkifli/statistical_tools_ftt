@@ -162,7 +162,7 @@ with tab6:
     bounce = st.number_input(
         "Bounce Rate (%)",
         min_value=0.0, max_value=100.0,
-        step=0.1, format="%.1f",
+        step=0.1, format="%.2f",
         key="br_val",
         help="Enter as a percentage, e.g. 10 for 10%"
     )
